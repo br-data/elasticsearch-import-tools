@@ -1,0 +1,23 @@
+{
+  "name": "elasticsearch-import-tools",
+  "description": "Tools for importing documents to Elasticsearch",
+  "author": "Steffen Kühne",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:digitalegarage/elasticsearch-import-tools.git"
+  },
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "elasticsearch": "^11.0.1",
+    "node-dir": "^0.1.16",
+    "tika": "git@github.com:ICIJ/node-tika.git"
+  },
+  "devDependencies": {
+    "eslint-config-esnext": "^1.6.0"
+  }
+}
