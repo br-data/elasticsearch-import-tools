@@ -1,8 +1,6 @@
 ### Project ###
 pdf/
 text/
-contratos-text/
-contratos-pdf/
 
 ### Node ###
 node_modules
