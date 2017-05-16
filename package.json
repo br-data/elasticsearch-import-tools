@@ -10,10 +10,11 @@
     "url": "git@github.com:digitalegarage/elasticsearch-import-tools.git"
   },
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node server.js"
   },
   "dependencies": {
     "elasticsearch": "^11.0.1",
+    "express": "^4.15.2",
     "node-dir": "^0.1.16",
     "tika": "git@github.com:ICIJ/node-tika.git"
   },
