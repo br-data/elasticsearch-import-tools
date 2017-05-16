@@ -1,20 +1,18 @@
 # Elasticsearch Import Tools
-Extract text and meta data from documents and import them to [Elasticsearch](https://www.elastic.co/products/elasticsearch). Quite useful, if you want to analyze a document leak or dump. The tool set uses [Apache Tika](https://tika.apache.org/) and [Tesseract](https://github.com/tesseract-ocr/tesseract) for text extraction and OCR.
+Extract text and meta data from documents and import them to [Elasticsearch](https://www.elastic.co/products/elasticsearch). Quite useful, if you want to analyze a big document leak. The toolset uses [Apache Tika](https://tika.apache.org/) and [Tesseract](https://github.com/tesseract-ocr/tesseract) for text extraction and OCR.
 
 ## Usage
 1. Clone the repository `git clone https://...`
 2. Install dependencies `npm install`
 3. Run scripts, e.g. `node extract.js ./pdf ./text 'POR'`
 
-### Dependencies
-All scripts are written in JavaScript. To run them you'll need at least **Node.js v6**. Check out the [installation guideline](https://nodejs.org/en/download/package-manager/).
+## Requirement
+All scripts are written in JavaScript. To run them, you'll need at least **Node.js v6**. Check out the [Node.js installation guide](https://nodejs.org/en/download/package-manager/). The import tools use **Elasticsearch 2.4** for document storage and search. For further details, please refer to the [Elasticsearch installation guide](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html).
 
-The import tools use **Elasticsearch 2.4** for document storage and search. For further details, please refer to the [official installation guide](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html).
-
-To check if your Elasticsearch is up and running call the REST-Interface from the command line:
+To check if your Elasticsearch is up and running, call the REST-Interface from the command line:
 
 ```
-$ curl http://localhost:9200/_cluster/health\?pretty\=1
+$ curl -XGET http://localhost:9200/_cluster/health\?pretty\=1
 ```
 
 If you are seeing a _Unassigned shards_ warning, you might consider setting the numbers of replicas to 0. This works fine in a development environment:
@@ -112,6 +110,12 @@ body: {
 }
 ```
 
+To check if your document are all in place, run a simple search query on your index:
+
+```
+$ curl -XGET 'localhost:9200/my-index/_search?q=body:my-query&pretty'
+```
+
 ### server.js
 Simple search service with an REST interface. The data from the Elasticsearch cluster can be queried via an API service. There are several ways to make a request:
 
@@ -170,5 +174,8 @@ And this is what the response might look like:
 
 **Note:** The maximum number of results is hard-coded to 100. You can change the limit in the code: `const maxSize = 500;`. Currently the big document bodies are excluded from the response. Instead we get an array of highlighted paragraphs, which contain our search term. As before, this can easily be changed in the configuration object.
 
-### Improvements
+## Frontend
+If you are looking for a web frontend to search your Elasticsearch document collection, have a look at [elasticsearch-frontend](https://github.com/br-data/elasticsearch-frontend). The application is build with [Express](https://expressjs.com/) and supports user authentication.
+
+## Improvements
 - Move the Elasticsearch database settings (host, port, index) to a `./config` file
