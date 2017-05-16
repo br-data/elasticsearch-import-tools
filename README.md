@@ -1,16 +1,15 @@
 # Elasticsearch Import Tools
-Extract text and metadata from documents and import them to [Elasticsearch](https://www.elastic.co/products/elasticsearch). Quite useful, if you want to analyse a document leak or dump. The toolset uses [Apache Tika](https://tika.apache.org/) and [Tesseract](https://github.com/tesseract-ocr/tesseract) for text extraction and OCR.
+Extract text and meta data from documents and import them to [Elasticsearch](https://www.elastic.co/products/elasticsearch). Quite useful, if you want to analyze a document leak or dump. The tool set uses [Apache Tika](https://tika.apache.org/) and [Tesseract](https://github.com/tesseract-ocr/tesseract) for text extraction and OCR.
 
 ## Usage
 1. Clone the repository `git clone https://...`
 2. Install dependencies `npm install`
 3. Run scripts, e.g. `node extract.js ./pdf ./text 'POR'`
 
-### Dependendcies
-
+### Dependencies
 All scripts are written in JavaScript. To run them you'll need at least **Node.js v6**. Check out the [installation guideline](https://nodejs.org/en/download/package-manager/).
 
-The import tools use **Elasticsearch 2.4** for document storage and search. For further details, please refer to the [offical installation guide](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html).
+The import tools use **Elasticsearch 2.4** for document storage and search. For further details, please refer to the [official installation guide](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html).
 
 To check if your Elasticsearch is up and running call the REST-Interface from the command line:
 
@@ -18,7 +17,7 @@ To check if your Elasticsearch is up and running call the REST-Interface from th
 $ curl http://localhost:9200/_cluster/health\?pretty\=1
 ```
 
-If you are seeing a _Unassigned shards_ warning, you might consider setting the numbers of relicas to 0. This works fine in a development environment:
+If you are seeing a _Unassigned shards_ warning, you might consider setting the numbers of replicas to 0. This works fine in a development environment:
 
 ```
 $ curl -XPUT 'localhost:9200/_settings' -d '         
@@ -101,7 +100,7 @@ Once the Elasticsearch index is prepared, we can start to import the extracted t
 $ node import.js ./text localhost:9200 my-index doc
 ```
 
-This simple importer saves only the filepath and the document body to Elasticsearch. In theory, you could add additional metadata like date, author, language etc. to allow for advanced filtering and sorting.
+This simple importer saves only the file path and the document body to Elasticsearch. In theory, you could add additional meta data like date, author, language etc. to allow for advanced filtering and sorting.
 
 ```javascript
 body: {
@@ -112,6 +111,64 @@ body: {
   body: body
 }
 ```
+
+### server.js
+Simple search service with an REST interface. The data from the Elasticsearch cluster can be queried via an API service. There are several ways to make a request:
+
+- `GET http://localhost:3003/match/:query` Full text search. Finds only exact matches **John Doe** ([details](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html)).
+- `GET http://localhost:3003/custom/:query` Custom full text search. Finds all terms of a query: **"John" AND "Doe"**. Supports wildcards and simple search operators ([details](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html)).
+- `GET http://localhost:3003/fuzzy/:query` Fuzzy search. Finds all similar terms of a query: **Jhon** ([details](https// https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html)).
+- `GET http://localhost:3003/regexp/:query` Regular expression support for term-based search: **J.hn*** ([details](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html)).
+
+Run the server:
+
+```
+$ node server.js
+```
+
+Query the service for *evil company*:
+
+```
+$ curl http://localhost:3003/match/evil%20company
+```
+
+And this is what the response might look like:
+
+```json
+{
+  "took": 2680,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "failed": 0
+  },
+  "hits": {
+    "total": 1,
+    "max_score": 0.40393832,
+    "hits": [
+      {
+        "_index": "my-index",
+        "_type": "doc",
+        "_id": "AVvJsJpysUfTp_aHjvMj",
+        "_score": 0.40393832,
+        "_source": {
+          "file": "text/document-vii-2016-01-11.txt",
+          "name": "Notification Of Disclosure, January 11th, 2016 "
+        },
+        "highlight": {
+          "body": [
+            "Evidence that <em>Evil Company</em> is doing evil things",
+            "More incriminating information about <em>Evil Company</em>",
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+**Note:** The maximum number of results is hard-coded to 100. You can change the limit in the code: `const maxSize = 500;`. Currently the big document bodies are excluded from the response. Instead we get an array of highlighted paragraphs, which contain our search term. As before, this can easily be changed in the configuration object.
 
 ### Improvements
 - Move the Elasticsearch database settings (host, port, index) to a `./config` file
