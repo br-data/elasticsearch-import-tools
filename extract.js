@@ -14,7 +14,7 @@
   const options = {
 
     contentType: 'application/pdf',
-    ocrLanguage: 'deu',
+    ocrLanguage: 'eng',
     pdfEnableAutoSpace: true,
     pdfExtractInlineImages: true
   };
