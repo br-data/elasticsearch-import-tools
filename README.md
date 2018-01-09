@@ -26,17 +26,25 @@ $ curl -XPUT 'localhost:9200/_settings' -d '
 }'
 ```
 
-## Tools
-This section will explain the particular scripts and how to use them.
+## Workflow
+Extract, transform and load. All the scripts in the tool belt and how to use them.
 
 ### extract.js
-Saves all text from various documents (like PDFS) as a text file. Extracts text from PDF files or images if necessary. This is quite common, since many PDF files are simply scanned documents. The script accepts a [ISO language code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) as third parameter. Setting the document language will heavily improve OCR quality (default to ENG): 
+Extracts text from PDF files, using OCR if necessary. Doing OCR on images within a PDF file is quite useful, since many PDF files are scanned documents. The script accepts a [ISO language code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) as third parameter. Setting the document language will heavily improve OCR quality (default to ENG): 
 
 ```
 $ node extract.js ./pdf ./text 'POR'
 ```
 
-The script uses [node-tika](https://github.com/ICIJ/node-tika) as a bridge between Node.js and Tika (Java). However, extracting text from PDFs and images is error-prone. If you encounter problems you might try using Tika without the Node.js bridge. Just [download the Tika JAR](https://tika.apache.org/download.html) and call it from the command line. Example:
+The legacy extraction mode might be quite slow. To use all CPU cores of your machine to crunch PDFs, run
+
+```
+$ node extract-multicore.js ./pdf ./text 'POR'
+```
+
+The multi-core implementation is based on the [Node Cluster API](https://nodejs.org/api/cluster.html).
+
+The script uses [node-tika](https://github.com/ICIJ/node-tika) as a bridge between Node.js and Tika (Java). However, extracting text from PDFs and images is error-prone. If you encounter problems, you might try using Tika without the Node.js bridge. Just [download the Tika JAR](https://tika.apache.org/download.html) and call it from the command line. Example:
 
 ```
 $ java -jar tika-app-1.14.jar -t -i ./pdf -o ./text   
