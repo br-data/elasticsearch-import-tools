@@ -30,8 +30,8 @@ router.get('/', (req, res) => {
 
   res.json({
 
-    name: 'Elasticsearch Simple Serarch',
-    message: 'Elasticsearch Simple Serarch is up and running',
+    name: 'Elasticsearch Simple Search',
+    message: 'Elasticsearch Simple Search is up and running',
     version: '0.0.1'
   });
 });
